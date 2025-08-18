@@ -26,7 +26,7 @@
           "Port": 5294
         }
       ]
-      
+
     },
     {
       "UpstreamPathTemplate": "/gateway/products/{id}",
@@ -39,7 +39,25 @@
           "Port": 5294
         }
       ]
-      
+
+    },
+
+    // Consulta de pedidos
+
+    {
+      "UpstreamPathTemplate": "/gateway/orders",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/orders",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5201 
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      }
     },
 
     // Rota para o serviço de Vendas

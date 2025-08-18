@@ -10,7 +10,7 @@ O sistema é composto por quatro serviços independentes:
 * **Serviço de Vendas (`Sales.API`):** Gerencia os pedidos de venda, interagindo com o serviço de estoque para validação.
 * **API Gateway:** Atua como um ponto de entrada único (Single Point of Entry) para todas as requisições, roteando-as para o microserviço apropriado.
 
-A comunicação entre os serviços de Vendas e Estoque é realizada de forma assíncrona utilizando **RabbitMQ** para garantir a resiliência e o desacoplamento das operações de atualização de estoque.
+A comunicação entre os serviços de Vendas e Estoque é realizada de forma assíncrona utilizando **RabbitMQ** para garantir a resiliência e o desacoplamento das operações de atualização de estoque. Todo o sistema é instrumentado com **Serilog** para logging estruturado, com os logs centralizados e visualizados na ferramenta **Seq**.
 
 ## Arquitetura Proposta
 
@@ -23,6 +23,7 @@ A solução segue o padrão de arquitetura de microserviços com um API Gateway 
 * **Arquitetura:** ASP.NET Core Web API
 * **Banco de Dados:** MySQL 8.0
 * **Mensageria:** RabbitMQ 3
+* **Logging e Monitoramento:** Serilog e Seq
 * **API Gateway:** Ocelot
 * **ORM:** Entity Framework Core 8
 * **Autenticação:** JWT (JSON Web Tokens)
@@ -32,6 +33,7 @@ A solução segue o padrão de arquitetura de microserviços com um API Gateway 
 
 * `Pomelo.EntityFrameworkCore.MySql`: Provedor do Entity Framework Core para comunicação com o banco de dados MySQL.
 * `Microsoft.EntityFrameworkCore.Design`: Ferramentas de design do EF Core para a criação de migrations.
+* `Serilog.AspNetCore`, `Serilog.Sinks.Seq`, `Serilog.Sinks.File`: Para logging estruturado.
 * `RabbitMQ.Client`: Cliente oficial .NET para comunicação com o RabbitMQ.
 * `Ocelot`: Framework para implementação do API Gateway.
 * `Microsoft.AspNetCore.Authentication.JwtBearer`: Middleware para validação de tokens JWT.
@@ -49,11 +51,15 @@ A solução segue o padrão de arquitetura de microserviços com um API Gateway 
     git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
     cd seu-repositorio
     ```
-2.  Inicie a infraestrutura (MySQL e RabbitMQ) com o Docker Compose:
+2.  Inicie a infraestrutura (MySQL, RabbitMQ e Seq) com o Docker. Abra um terminal na raiz do projeto e execute os dois comandos a seguir:
     ```bash
+    # Inicia o MySQL e RabbitMQ
     docker-compose up -d
+
+    # Inicia o Seq em um container separado
+    docker run --name seq -d -e ACCEPT_EULA=Y -p 5341:80 datalust/seq:latest
     ```
-3.  Aguarde cerca de 1 minuto para os containers iniciarem completamente.
+3.  Aguarde cerca de 1 minuto para os containers iniciarem. Você pode verificar se estão rodando com `docker ps`.
 
 4.  Na primeira execução, é necessário criar os bancos de dados e aplicar as migrations. Abra dois terminais separados:
     ```bash
@@ -83,6 +89,7 @@ A solução segue o padrão de arquitetura de microserviços com um API Gateway 
     cd src/ApiGateway
     dotnet run
     ```
+6.  Para visualizar os logs em tempo real, acesse `http://localhost:5341` no seu navegador.
 
 ## Como Testar a API (Fluxo Básico)
 

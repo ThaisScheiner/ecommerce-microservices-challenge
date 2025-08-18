@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Sales.API.Data;
 using Sales.API.Dtos;
@@ -21,6 +22,14 @@ namespace Sales.API.Controllers
             _context = context;
             _messageBus = messageBus;
             _httpClient = httpClientFactory.CreateClient("StockService");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetOrders()
+        {
+            var orders = await _context.Orders.ToListAsync();
+            return Ok(orders);
         }
 
         [HttpPost]
