@@ -1,26 +1,30 @@
-# Desafio de Microserviços: E-commerce de Gestão de Estoque e Vendas
+# Desafio de Microserviços: Aplicação E-commerce Completa (Full Stack)
 
 ## Descrição do Projeto
 
-Este projeto é uma aplicação back-end desenvolvida com uma arquitetura de microserviços para simular o gerenciamento de estoque e vendas de uma plataforma de e-commerce. A solução foi projetada para ser escalável, robusta e segura, utilizando boas práticas de desenvolvimento e comunicação entre serviços.
+Este projeto implementa uma aplicação **full stack** com uma arquitetura de microserviços para simular o gerenciamento de estoque e vendas de uma plataforma de e-commerce. A solução foi projetada para ser escalável, robusta e segura, utilizando boas práticas de desenvolvimento, comunicação entre serviços e uma interface de usuário moderna.
 
-O sistema é composto por quatro serviços independentes:
+O sistema é composto por **cinco serviços independentes**:
+* **Front-end (`Ecommerce.WebApp`):** Uma Single Page Application (SPA) construída com **Blazor WebAssembly** que consome o back-end, gerencia a autenticação do usuário no lado do cliente e fornece uma interface rica para interagir com o sistema.
+* **API Gateway (`ApiGateway`):** Atua como um ponto de entrada único (Single Point of Entry) para o front-end, roteando as requisições para o microserviço apropriado.
 * **Serviço de Autenticação (`Auth.API`):** Responsável por validar credenciais e gerar tokens de acesso JWT.
 * **Serviço de Estoque (`Stock.API`):** Gerencia o cadastro de produtos e controla a quantidade disponível em estoque.
 * **Serviço de Vendas (`Sales.API`):** Gerencia os pedidos de venda, interagindo com o serviço de estoque para validação.
-* **API Gateway:** Atua como um ponto de entrada único (Single Point of Entry) para todas as requisições, roteando-as para o microserviço apropriado.
 
-A comunicação entre os serviços de Vendas e Estoque é realizada de forma assíncrona utilizando **RabbitMQ** para garantir a resiliência e o desacoplamento das operações de atualização de estoque. Todo o sistema é instrumentado com **Serilog** para logging estruturado, com os logs centralizados e visualizados na ferramenta **Seq**.
+A comunicação entre os serviços de Vendas e Estoque é realizada de forma **assíncrona** utilizando **RabbitMQ**. Todo o sistema de back-end é instrumentado com **Serilog** para logging estruturado, com os logs centralizados e visualizados na ferramenta **Seq**.
 
-## Arquitetura Proposta
+## Escolhas de Tecnologia
 
-A solução segue o padrão de arquitetura de microserviços com um API Gateway como fachada. A comunicação síncrona (validação de estoque) é feita via HTTP, enquanto a comunicação assíncrona (confirmação de venda e baixa de estoque) é feita via mensageria.
+### Front-end: Blazor WebAssembly
+A escolha pelo **Blazor WebAssembly** se deu por permitir a criação de uma Single Page Application (SPA) moderna e desacoplada, utilizando **C#** em vez de JavaScript. Isso permite o reaproveitamento de habilidades e modelos de dados do ecossistema .NET, além de oferecer uma integração nativa com a arquitetura de back-end existente.
+
+### Logging: Serilog + Seq
+Para o monitoramento, a dupla **Serilog + Seq** foi escolhida devido à sua leveza e facilidade de implementação em um ambiente de desenvolvimento, especialmente em máquinas com recursos limitados. O Serilog permite a criação de logs estruturados (em JSON), e o Seq oferece uma interface gráfica poderosa e de baixo consumo para centralizar, visualizar e filtrar esses logs em tempo real, o que é crucial para depurar uma arquitetura de microserviços.
 
 ## Tecnologias e Versões
 
 * **Linguagem:** C# 12
-* **Framework:** .NET 8.0 (LTS)
-* **Arquitetura:** ASP.NET Core Web API
+* **Frameworks:** .NET 8.0 (LTS), ASP.NET Core, Blazor WebAssembly
 * **Banco de Dados:** MySQL 8.0
 * **Mensageria:** RabbitMQ 3
 * **Logging e Monitoramento:** Serilog e Seq
@@ -31,37 +35,39 @@ A solução segue o padrão de arquitetura de microserviços com um API Gateway 
 
 ## Dependências (Pacotes NuGet)
 
-* `Pomelo.EntityFrameworkCore.MySql`: Provedor do Entity Framework Core para comunicação com o banco de dados MySQL.
-* `Microsoft.EntityFrameworkCore.Design`: Ferramentas de design do EF Core para a criação de migrations.
-* `Serilog.AspNetCore`, `Serilog.Sinks.Seq`, `Serilog.Sinks.File`: Para logging estruturado.
-* `RabbitMQ.Client`: Cliente oficial .NET para comunicação com o RabbitMQ.
-* `Ocelot`: Framework para implementação do API Gateway.
-* `Microsoft.AspNetCore.Authentication.JwtBearer`: Middleware para validação de tokens JWT.
-* `Swashbuckle.AspNetCore`: Geração automática de documentação da API (Swagger/OpenAPI).
+* **Back-end:**
+    * `Pomelo.EntityFrameworkCore.MySql`
+    * `Microsoft.EntityFrameworkCore.Design`
+    * `Serilog.AspNetCore`, `Serilog.Sinks.Seq`
+    * `RabbitMQ.Client`
+    * `Ocelot`
+    * `Microsoft.AspNetCore.Authentication.JwtBearer`
+* **Front-end (`Ecommerce.WebApp`):**
+    * `Microsoft.AspNetCore.Components.WebAssembly`
+    * `Microsoft.AspNetCore.Components.Authorization`
+    * `Blazored.LocalStorage` (para salvar o token JWT no navegador)
+    * `Blazored.Toast` (para notificações)
+    * `System.IdentityModel.Tokens.Jwt` (para decodificar o token)
 
-## Como Executar o Projeto
+## Como Executar o Projeto Completo
 
 ### Pré-requisitos
 * [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 ### Passos para Execução
-1.  Clone este repositório:
-    ```bash
-    git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
-    cd seu-repositorio
-    ```
-2.  Inicie a infraestrutura (MySQL, RabbitMQ e Seq) com o Docker. Abra um terminal na raiz do projeto e execute os dois comandos a seguir:
+1.  Clone este repositório.
+2.  Na raiz do projeto, inicie toda a infraestrutura com Docker:
     ```bash
     # Inicia o MySQL e RabbitMQ
     docker-compose up -d
 
     # Inicia o Seq em um container separado
-    docker run --name seq -d -e ACCEPT_EULA=Y -p 5341:80 datalust/seq:latest
+    docker run --name seq -d -e ACCEPT_EULA=Y -e SEQ_FIRSTRUN_NOAUTHENTICATION=true -p 5341:80 datalust/seq:latest
     ```
-3.  Aguarde cerca de 1 minuto para os containers iniciarem. Você pode verificar se estão rodando com `docker ps`.
+3.  Aguarde um minuto e verifique se os 3 containers (`mysql_db`, `rabbitmq`, `seq`) estão rodando com `docker ps`.
 
-4.  Na primeira execução, é necessário criar os bancos de dados e aplicar as migrations. Abra dois terminais separados:
+4.  Aplique as migrations para criar os bancos de dados:
     ```bash
     # Terminal 1
     cd src/Stock.API
@@ -71,60 +77,26 @@ A solução segue o padrão de arquitetura de microserviços com um API Gateway 
     cd src/Sales.API
     dotnet ef database update
     ```
-5.  Inicie os 4 microserviços. Você precisará de **4 terminais abertos** simultaneamente:
+5.  Inicie os **5 serviços** da aplicação. Você precisará de **5 terminais abertos**:
     ```bash
-    # Terminal 1
-    cd src/Auth.API
-    dotnet run
+    # Terminais para o Back-end
+    cd src/Auth.API && dotnet run
+    cd src/Stock.API && dotnet run
+    cd src/Sales.API && dotnet run
+    cd src/ApiGateway && dotnet run
 
-    # Terminal 2
-    cd src/Stock.API
-    dotnet run
-
-    # Terminal 3
-    cd src/Sales.API
-    dotnet run
-
-    # Terminal 4
-    cd src/ApiGateway
-    dotnet run
+    # Terminal para o Front-end
+    cd src/Ecommerce.WebApp && dotnet run
     ```
-6.  Para visualizar os logs em tempo real, acesse `http://localhost:5341` no seu navegador.
+6.  Acesse a aplicação no seu navegador (a URL do `Ecommerce.WebApp`, ex: `http://localhost:5069`).
+7.  Acesse a interface de logs no seu navegador em `http://localhost:5341`.
 
-## Como Testar a API (Fluxo Básico)
+## Como Testar a Aplicação
 
-Use uma ferramenta como Postman ou Insomnia. Todas as requisições devem ser feitas para o API Gateway (por padrão, rodando em `http://localhost:5116` ou outra porta informada no log).
+1.  Acesse a aplicação no navegador.
+2.  Clique em **"Login"** e use as credenciais `admin` / `password`.
+3.  Você será redirecionado e verá a saudação "Olá, admin!". Links para "Produtos" e "Realizar Venda" aparecerão no menu.
+4.  Navegue para a página **"Produtos"**, cadastre um novo produto e veja a lista ser atualizada.
+5.  Navegue para a página **"Realizar Venda"**, selecione um produto, a quantidade e confirme. Uma notificação "toast" de sucesso deve aparecer.
+6.  Volte para a página **"Produtos"** e confirme que o estoque do item vendido diminuiu.
 
-1.  **Obter Token:** Faça um `POST` para `/gateway/login` com o corpo:
-    ```json
-    {
-        "username": "admin",
-        "password": "password"
-    }
-    ```
-    Copie o token JWT da resposta.
-
-2.  **Criar Produto:** Faça um `POST` para `/gateway/products`.
-    * **Header:** `Authorization: Bearer <seu_token_jwt>`
-    * **Body:**
-        ```json
-        {
-          "name": "Produto de Teste",
-          "description": "Descrição do produto",
-          "price": 19.99,
-          "quantityInStock": 50
-        }
-        ```
-
-3.  **Realizar Venda:** Faça um `POST` para `/gateway/orders`.
-    * **Header:** `Authorization: Bearer <seu_token_jwt>`
-    * **Body:**
-        ```json
-        {
-          "productId": 1,
-          "quantity": 5
-        }
-        ```
-4.  **Verificar Estoque:** Faça um `GET` para `/gateway/products/1`.
-    * **Header:** `Authorization: Bearer <seu_token_jwt>`
-    * Verifique se o `quantityInStock` foi atualizado para `45`.
