@@ -2,25 +2,28 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
-using Serilog;
 using System.Text;
-using Serilog; 
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ## PASSO 1: Adicionar a política de CORS ##
+// Define uma política chamada "CorsPolicy"
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        // Permite que a aplicação rodando em localhost:5069 faça chamadas
+        policy.WithOrigins("http://localhost:5069")
+              .AllowAnyMethod() // Permite qualquer método (POST, GET, etc.)
+              .AllowAnyHeader(); // Permite qualquer cabeçalho
+    });
+});
 
-// Serilog
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
-
-builder.Host.UseSerilog();
-
-
-// Adiciona a configuração e os serviços do Ocelot
+// Adiciona os serviços do Ocelot
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 builder.Services.AddOcelot();
 
+// Configuração da Autenticação JWT
 var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]!);
 builder.Services.AddAuthentication()
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
@@ -37,7 +40,11 @@ builder.Services.AddAuthentication()
 
 var app = builder.Build();
 
-// Adiciona o middleware do Ocelot ao pipeline de requisições
+// ## PASSO 2: Usar a política de CORS ##
+// IMPORTANTE: Deve vir antes de app.UseOcelot()
+app.UseCors("CorsPolicy");
+
+// Middleware do Ocelot
 await app.UseOcelot();
 
 app.Run();

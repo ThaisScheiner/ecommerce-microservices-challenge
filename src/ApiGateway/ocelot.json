@@ -28,6 +28,19 @@
       ]
 
     },
+    
+    {
+      "UpstreamPathTemplate": "/gateway/products",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/products",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5294
+        }
+      ]
+    },
     {
       "UpstreamPathTemplate": "/gateway/products/{id}",
       "UpstreamHttpMethod": [ "GET" ],
@@ -52,7 +65,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5201 
+          "Port": 5201
         }
       ],
       "AuthenticationOptions": {
