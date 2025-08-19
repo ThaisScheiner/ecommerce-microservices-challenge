@@ -1,0 +1,21 @@
+﻿@using Ecommerce.WebApp.Services
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+<AuthorizeView>
+    <Authorized>
+        <span class="nav-link">Olá, @context.User.Identity?.Name!</span>
+        <button class="nav-link btn btn-link" @onclick="BeginLogout">Sair</button>
+    </Authorized>
+    <NotAuthorized>
+        <a class="nav-link" href="login">Login</a>
+    </NotAuthorized>
+</AuthorizeView> 
+
+@code {
+    private async Task BeginLogout()
+    {
+        await AuthService.Logout();
+        NavigationManager.NavigateTo("/");
+    }
+}

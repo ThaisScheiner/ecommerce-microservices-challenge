@@ -1,0 +1,46 @@
+﻿
+
+<h3>Login</h3>
+
+@page "/login"
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="form-group mb-2">
+            <label>Usuário</label>
+            <input class="form-control" @bind="loginModel.Username" />
+        </div>
+        <div class="form-group mb-3">
+            <label>Senha</label>
+            <input type="password" class="form-control" @bind="loginModel.Password" />
+        </div>
+        <button class="btn btn-primary" @onclick="HandleLogin">Entrar</button>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        var result = await AuthService.Login(loginModel);
+        if (result)
+        {
+            // Redireciona para a página inicial após o login bem-sucedido
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = "Usuário ou senha inválidos.";
+        }
+    }
+}
