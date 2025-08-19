@@ -1,0 +1,88 @@
+﻿@page "/sales"
+@attribute [Authorize]
+@using Ecommerce.WebApp.Models
+@using Microsoft.AspNetCore.Authorization
+@inject IProductService ProductService
+@inject IOrderService OrderService
+@inject IToastService ToastService
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+
+        <h3 class="mb-4">Realizar Venda</h3>
+
+        @if (availableProducts == null)
+        {
+            <p><em>Carregando produtos disponíveis...</em></p>
+        }
+        else
+        {
+            <div class="card">
+                <div class="card-header">
+                    Nova Venda
+                </div>
+                <div class="card-body">
+                    <EditForm Model="newOrder" OnValidSubmit="HandleCreateOrder">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label for="product" class="form-label">Selecione o Produto:</label>
+                            <InputSelect id="product" class="form-select" @bind-Value="newOrder.ProductId">
+                                <option value="0" disabled selected>-- Escolha um produto --</option>
+                                @foreach (var product in availableProducts)
+                                {
+                                    <option value="@product.Id">@product.Name (Estoque: @product.QuantityInStock)</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantidade:</label>
+                            <InputNumber id="quantity" class="form-control" @bind-Value="newOrder.Quantity" />
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Realizar Venda</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+    private List<Product>? availableProducts;
+    private CreateOrderRequest newOrder = new();
+    // As variáveis successMessage e errorMessage foram removidas
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableProducts = await ProductService.GetProducts();
+    }
+
+    private async Task HandleCreateOrder()
+    {
+        if (newOrder.ProductId == 0 || newOrder.Quantity <= 0)
+        {
+            ToastService.ShowWarning("Por favor, selecione um produto e informe uma quantidade válida.");
+            return;
+        }
+
+        var result = await OrderService.CreateOrder(newOrder);
+
+        if (result != null)
+        {
+            ToastService.ShowSuccess($"Venda realizada com sucesso! (ID do Pedido: {result.Id})");
+
+            newOrder = new(); // Limpa o formulário
+            availableProducts = await ProductService.GetProducts();
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError("Falha ao realizar a venda. Verifique o estoque ou tente novamente.");
+        }
+    }
+}
